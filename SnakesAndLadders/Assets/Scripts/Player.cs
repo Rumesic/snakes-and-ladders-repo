@@ -24,14 +24,13 @@ public class Player : MonoBehaviour
 
     void UpdatePosition()
     {
-        Vector3 tilePos = new Vector2(GameManager.levelGenerator.tiles[position].anchoredPosition.x, GameManager.levelGenerator.tiles[position].anchoredPosition.y);
+        Vector3 tilePos = new Vector2(GameManager.levelGenerator.tileArray[position].RectT.anchoredPosition.x, GameManager.levelGenerator.tileArray[position].RectT.anchoredPosition.y);
         Vector3 levelAnchorPos = GameManager.levelRectTransform;
         rectT.DOAnchorPos(tilePos + levelAnchorPos, 1);
     }
 
     public void SetPosition(int index)
     {
-        position = (position + index < 100) ? position += index : position = GameManager.levelGenerator.tiles.Count -1;
-        //position += index;
+        position = (position + index < 100) ? position += index : position = GameManager.levelGenerator.tileArray.Length -1;
     }
 }
