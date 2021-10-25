@@ -10,7 +10,7 @@ public class Tile
     [SerializeField] private Vector2 localCoordinates;
     [SerializeField] private RectTransform rectT;
     [SerializeField] private TextMeshProUGUI textMesh;
-    [SerializeField] private Tile connectedTile;
+    [SerializeField] private int connectedIndex;
     [SerializeField] private LineRenderer lineR;
     [SerializeField] private bool specialTile;
 
@@ -63,15 +63,15 @@ public class Tile
         }
     }
 
-    public Tile ConnectedTile
+    public int ConnectedIndex
     {
         get
         {
-            return connectedTile;
+            return connectedIndex;
         }
         set
         {
-            connectedTile = value;
+            connectedIndex = value;
         }
     }
 

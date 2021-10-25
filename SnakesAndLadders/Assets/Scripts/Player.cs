@@ -31,6 +31,14 @@ public class Player : MonoBehaviour
 
     public void SetPosition(int index)
     {
-        position = (position + index < 100) ? position += index : position = GameManager.levelGenerator.tileArray.Length -1;
+        position = (position + index < GameManager.levelGenerator.tileArray.Length - 1) ? position += index : position = GameManager.levelGenerator.tileArray.Length -1;
+        Tile currentTile = GameManager.levelGenerator.tileArray[position];
+        if (currentTile.SpecialTile && currentTile.ConnectedIndex != 0)
+        {
+            Debug.Log(currentTile.ConnectedIndex);
+            position = currentTile.ConnectedIndex;
+            //SetPosition(currentTile.ConnectedIndex);
+        }
+
     }
 }

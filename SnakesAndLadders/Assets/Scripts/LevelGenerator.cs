@@ -10,9 +10,9 @@ public class LevelGenerator : MonoBehaviour
     [Range(0, 100)]
     [SerializeField] float tileSize = 10;
 
-    [Range(0, 10)]
+    [Range(0, 20)]
     [SerializeField] int columnCount = 10;
-    [Range(0, 10)]
+    [Range(0, 20)]
     [SerializeField] int rowCount = 10;
     [SerializeField] Sprite testSprite;
     [SerializeField] Material ladderMat;
@@ -22,13 +22,13 @@ public class LevelGenerator : MonoBehaviour
     Vector2 screenSize;
     // Start is called before the first frame update
     void Start()
-    {
-        /*
-        foreach(RectTransform t in tiles)
+    {      
+
+        for (int i = 0; i < tileArray.Length; i++)
         {
-            t.localScale = Vector3.zero;
+            float smoothTime = 1 + (i / 10);
+            tileArray[i].RectT.localScale = Vector3.zero;
         }
-        */
     }
 
     // Update is called once per frame
@@ -38,7 +38,7 @@ public class LevelGenerator : MonoBehaviour
         for (int i = 0; i < tileArray.Length; i++)
         {
             float smoothTime = 1 + (i / 10);
-            tileArray[i].RectT.DOScale(1, smoothTime);
+            tileArray[i].RectT.DOScale(.85f, smoothTime);
         }
     }
 
@@ -121,7 +121,7 @@ public class LevelGenerator : MonoBehaviour
 
     void DetermineSpecialTiles()
     {
-        int occurance = tileArray.Length / 5;
+        int occurance = tileArray.Length / 6;
         //int minLeap = tileArray.Length / 15;
         //int maxLeap = tileArray.Length - (tileArray.Length / 20);
         int currentLadders = 0;
@@ -178,6 +178,7 @@ public class LevelGenerator : MonoBehaviour
             if (tileArray[i].LocalCoordinates == new Vector2(randomX, randomY))
             {
                 tileArray[i].SpecialTile = true;
+                tileArray[index].ConnectedIndex = i;
                 return targetIndex = i;
             }
         }
@@ -196,6 +197,7 @@ public class LevelGenerator : MonoBehaviour
             if (tileArray[i].LocalCoordinates == new Vector2(randomX, randomY))
             {
                 tileArray[i].SpecialTile = true;
+                tileArray[index].ConnectedIndex = i;
                 return targetIndex = i;
             }
         }
@@ -206,17 +208,35 @@ public class LevelGenerator : MonoBehaviour
     {
         LineRenderer rend = new GameObject(origin.RectT.gameObject.ToString()).AddComponent<LineRenderer>();
 
-        rend.material = (orientation == 0) ? ladderMat : snakeMat;
+        //rend.material = (orientation == 0) ? ladderMat : snakeMat;
         rend.transform.SetParent(origin.RectT);
-        rend.positionCount = 2;
 
-        rend.startWidth = 0.4f;
-        rend.endWidth = 0.1f;
         rend.textureMode = LineTextureMode.Tile;
 
-        Vector3 zOffset = new Vector3(0, 0, -1);
+        Vector3 zOffset = new Vector3(0, 0, 1f);
         rend.SetPosition(0, origin.RectT.transform.position + zOffset);
         rend.SetPosition(1, target.RectT.transform.position + zOffset);
+
+        if(orientation == 0)
+        {
+            rend.material = ladderMat;
+            rend.positionCount = 2;
+            rend.startWidth = 0.4f;
+            rend.endWidth = 0.2f;
+            rend.SetPosition(0, origin.RectT.transform.position + zOffset);
+            rend.SetPosition(1, target.RectT.transform.position + zOffset);
+        }
+        else
+        {
+            rend.material = snakeMat;
+            rend.positionCount = 3;
+            rend.startWidth = 0.5f;
+            rend.endWidth = 0.4f;
+            rend.SetPosition(0, origin.RectT.transform.position + zOffset);
+            Vector3 tempPos = new Vector3(origin.RectT.transform.position.x, target.RectT.transform.position.y, origin.RectT.transform.position.z);
+            rend.SetPosition(1, tempPos + zOffset);
+            rend.SetPosition(2, target.RectT.transform.position + zOffset);
+        }
 
         origin.LineR = rend;
     }

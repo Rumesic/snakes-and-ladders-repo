@@ -32,6 +32,8 @@ public class GameManager : MonoBehaviour
             RectTransform newT = new GameObject("Player_" + (i + 1)).AddComponent<RectTransform>();
             newT.SetParent(gameObject.transform);
             newT.gameObject.AddComponent<Image>();
+            newT.localPosition = Vector3.zero;
+            newT.localScale = Vector3.one;
             players.Add(newT.gameObject.AddComponent<Player>());
 
         }
