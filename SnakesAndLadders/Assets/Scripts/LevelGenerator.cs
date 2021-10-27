@@ -19,6 +19,8 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] Material snakeMat;
 
     [SerializeField] public Tile[] tileArray;
+    [SerializeField] TMP_FontAsset fontAsset;
+    [SerializeField] Color textColor;
     Vector2 screenSize;
     // Start is called before the first frame update
     void Start()
@@ -114,7 +116,9 @@ public class LevelGenerator : MonoBehaviour
         TextMeshProUGUI textObject = newText.gameObject.AddComponent<TextMeshProUGUI>();
         textObject.text = (index +1).ToString();
         textObject.alignment = TMPro.TextAlignmentOptions.Center;
-        textObject.fontSize = 24;
+        textObject.font = fontAsset;
+        textObject.color = textColor;
+        textObject.fontSize = 45;
 
         tileArray[index].TextMesh = textObject;
     }
@@ -212,6 +216,7 @@ public class LevelGenerator : MonoBehaviour
         rend.transform.SetParent(origin.RectT);
 
         rend.textureMode = LineTextureMode.Tile;
+        rend.alignment = LineAlignment.TransformZ;
 
         Vector3 zOffset = new Vector3(0, 0, 1f);
         rend.SetPosition(0, origin.RectT.transform.position + zOffset);

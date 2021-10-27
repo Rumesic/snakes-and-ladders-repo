@@ -10,6 +10,8 @@ public class Player : MonoBehaviour
     [Range(0,99)]
     [SerializeField] public int position;
 
+    public bool gameFinished;
+
 
     RectTransform rectT;
 
@@ -20,6 +22,9 @@ public class Player : MonoBehaviour
     private void Update()
     {
         UpdatePosition();
+
+        if (gameFinished)
+            PlayerFinished();
     }
 
     void UpdatePosition()
@@ -31,7 +36,7 @@ public class Player : MonoBehaviour
 
     public void SetPosition(int index)
     {
-        position = (position + index < GameManager.levelGenerator.tileArray.Length - 1) ? position += index : position = GameManager.levelGenerator.tileArray.Length -1;
+        position = (index < GameManager.levelGenerator.tileArray.Length - 1) ? index : GameManager.levelGenerator.tileArray.Length -1;
         Tile currentTile = GameManager.levelGenerator.tileArray[position];
         if (currentTile.SpecialTile && currentTile.ConnectedIndex != 0)
         {
@@ -39,6 +44,15 @@ public class Player : MonoBehaviour
             position = currentTile.ConnectedIndex;
             //SetPosition(currentTile.ConnectedIndex);
         }
+        if (position == GameManager.levelGenerator.tileArray.Length - 1)
+            PlayerFinished();
 
+    }
+
+
+    void PlayerFinished()
+    {
+        gameFinished = true;
+        rectT.DOScale(0, 1);
     }
 }
