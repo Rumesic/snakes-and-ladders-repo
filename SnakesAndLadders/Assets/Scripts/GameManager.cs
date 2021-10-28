@@ -24,6 +24,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] GameObject Dice;
 
     [Header("UI")]
+
+    [SerializeField] Image dicePlayerIndicator;
     public CanvasScaler mainCanvas;
     [SerializeField] RectTransform endPanel;
     [SerializeField] RectTransform scrollPaper;
@@ -104,10 +106,12 @@ public class GameManager : MonoBehaviour
             Player newPlayer = newT.gameObject.AddComponent<Player>();
             newPlayer.PlayerIndex = i;
             newPlayer.Position = -1;
+            newPlayer.PlayerColor = playerColors[i];
             players.Add(newPlayer);
 
             canRoll = true;
         }
+        dicePlayerIndicator.color = players[0].PlayerColor;
     }
 
     public void RollDice(int roll)
@@ -175,6 +179,8 @@ public class GameManager : MonoBehaviour
             return;
 
         else currentPlayer = (currentPlayer <= players.Count - 2) ? currentPlayer += 1 : currentPlayer = 0;
+
+        dicePlayerIndicator.color = players[currentPlayer].PlayerColor;
     }
 
     void RemovePlayers()

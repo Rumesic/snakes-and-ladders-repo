@@ -13,11 +13,23 @@ public class Player : MonoBehaviour
     
     [SerializeField] private bool gameFinished;
 
+    [SerializeField] private Color playerColor;
+
 
 
 
     RectTransform rectT;
-
+    public Color PlayerColor
+    {
+        get
+        {
+            return playerColor;
+        }
+        set
+        {
+            playerColor = value;
+        }
+    }
     public bool GameFinished
     {
         get
