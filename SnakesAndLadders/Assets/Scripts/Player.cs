@@ -37,6 +37,7 @@ public class Player : MonoBehaviour
     public void SetPosition(int index)
     {
         position = (index < GameManager.levelGenerator.tileArray.Length - 1) ? index : GameManager.levelGenerator.tileArray.Length -1;
+        GameManager.levelGenerator.ActivateTile(position);
         Tile currentTile = GameManager.levelGenerator.tileArray[position];
         if (currentTile.SpecialTile && currentTile.ConnectedIndex != 0)
         {
