@@ -29,26 +29,19 @@ public class LevelGenerator : MonoBehaviour
     Vector2 screenSize;
     // Start is called before the first frame update
     void Start()
-    {      
-
-        for (int i = 0; i < tileArray.Length; i++)
-        {
-            float smoothTime = 1 + (i / 10);
-            //tileArray[i].RectT.localScale = Vector3.zero;
-        }
-    }
-
-    // Update is called once per frame
-    void Update()
     {
-        //screenSize = new Vector2(Screen.width, Screen.height);
-        for (int i = 0; i < tileArray.Length; i++)
-        {
-            float smoothTime = 1 + (i / 10);
-            //tileArray[i].RectT.DOScale(.85f, smoothTime);
-        }
+        AnimateStart();
     }
 
+    void AnimateStart()
+    {
+        for (int i = 0; i < tileArray.Length; i++)
+        {
+            tileArray[i].RectT.localScale = Vector3.zero;
+            float smoothTime = 1 + (i / 10);
+            tileArray[i].RectT.DOScale(1f, smoothTime);
+        }
+    }
 
     public void ActivateTile(int index)
     {
@@ -217,8 +210,6 @@ public class LevelGenerator : MonoBehaviour
         LineRenderer rend = new GameObject(origin.RectT.gameObject.ToString()).AddComponent<LineRenderer>();
 
         rend.transform.localScale = new Vector3(0.6f, 0.6f, 0.6f);
-
-        //rend.material = (orientation == 0) ? ladderMat : snakeMat;
         rend.transform.SetParent(origin.RectT);
 
         rend.textureMode = LineTextureMode.Tile;
@@ -247,8 +238,6 @@ public class LevelGenerator : MonoBehaviour
             rend.startWidth = 0.4f;
             rend.endWidth = 0.2f;
             rend.SetPosition(0, origin.RectT.transform.position + zOffset);
-            //Vector3 tempPos = new Vector3(origin.RectT.transform.position.x, target.RectT.transform.position.y, origin.RectT.transform.position.z);
-            //rend.SetPosition(1, tempPos + zOffset);
             rend.SetPosition(1, target.RectT.transform.position + zOffset);
         }
 

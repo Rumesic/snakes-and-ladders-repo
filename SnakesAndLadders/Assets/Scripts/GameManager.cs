@@ -52,11 +52,6 @@ public class GameManager : MonoBehaviour
             Destroy(this.gameObject);
         }
     }
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
 
     void CheckLevelGenerator()
     {
@@ -119,7 +114,6 @@ public class GameManager : MonoBehaviour
     {
         randomDice = roll;
         waitingForRoll = false;
-        //Debug.Log(players[currentPlayer].Position);
         int negativeValue = players[currentPlayer].Position - randomDice;
         int positiveValue = players[currentPlayer].Position + randomDice;
         positiveValue = Mathf.Clamp(positiveValue, 0, levelGenerator.tileArray.Length - 1);
@@ -139,19 +133,17 @@ public class GameManager : MonoBehaviour
         position = Mathf.Clamp(position, 0, levelGenerator.tileArray.Length - 1);
         Vector3 tilePos = new Vector2(levelGenerator.tileArray[position].RectT.anchoredPosition.x, levelGenerator.tileArray[position].RectT.anchoredPosition.y);
         Vector3 levelAnchorPos = levelRectTransform;
-
-
         button.anchoredPosition = tilePos + levelAnchorPos;
     }
     
-    public void GoForward()
+    public void GoForward() //UI Button
     {
         int value = players[currentPlayer].Position + randomDice;
         value = Mathf.Clamp(value, 0, levelGenerator.tileArray.Length - 1);
         players[currentPlayer].SetPosition(value);
         ResetButtons();
     }
-    public void GoBackwards()
+    public void GoBackwards() //UI Button
     {
         int value = players[currentPlayer].Position - randomDice;
         value = Mathf.Clamp(value, 0, levelGenerator.tileArray.Length - 1);

@@ -67,12 +67,6 @@ public class DicePhysics : MonoBehaviour
 
     void DragInput()
     {
-        /*
-        if(dragActive && Input.GetMouseButtonUp(0) || (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Ended))
-        {
-            Drop();
-        }
-        */
         if (Input.GetMouseButton(0))
         {
             Vector3 mousePos = Input.mousePosition;
@@ -170,11 +164,7 @@ public class DicePhysics : MonoBehaviour
             targetPos = new Vector3(worldPos.x, worldPos.y, minPos);
 
             Vector3 difference = targetPos - transform.position;
-            //float distance = Vector3.Distance(transform.position, targetPos);
-            //distance = Mathf.Clamp(distance, 0, 3);
             transform.DOMove(targetPos, 0.15f);
-
-            //rb.AddForce((targetPos - transform.position) * distance);
             rb.AddTorque((targetPos - transform.position) * 10);
         }
     }
@@ -194,7 +184,6 @@ public class DicePhysics : MonoBehaviour
         canvas.transform.position = transform.position;
         mesh.localScale = targetScale;
         canvas.transform.localScale = targetScale;
-        //diceText.text = dragActive ? "Throw" : "Roll";
     }
 
 
