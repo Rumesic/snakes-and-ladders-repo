@@ -9,7 +9,7 @@ using UnityEngine.Rendering;
 public class LevelGenerator : MonoBehaviour
 {
     [Range(0, 150)]
-    [SerializeField] float tileSize = 10;
+    [SerializeField] public float tileSize = 10;
 
     [Range(0, 20)]
     [SerializeField] public int columnCount = 10;
@@ -41,7 +41,7 @@ public class LevelGenerator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        screenSize = new Vector2(Screen.width, Screen.height);
+        //screenSize = new Vector2(Screen.width, Screen.height);
         for (int i = 0; i < tileArray.Length; i++)
         {
             float smoothTime = 1 + (i / 10);
@@ -52,8 +52,9 @@ public class LevelGenerator : MonoBehaviour
 
     public void ActivateTile(int index)
     {
+        if (index == -1)
+            index = tileArray.Length - 1;
         tileArray[index].RectT.localScale = Vector3.zero;
-        Debug.Log("Tile" + index);
         tileArray[index].RectT.DOScale(.85f, .25f);
         if(tileArray[index].SpecialTile && tileArray[index].ConnectedIndex != 0)
         {
@@ -67,7 +68,7 @@ public class LevelGenerator : MonoBehaviour
     public void GenerateTiles()
     {
         ClearTiles();
-        screenSize = new Vector2(Screen.width, Screen.height);
+        screenSize = new Vector2(Screen.currentResolution.width, Screen.currentResolution.height);
         tileArray = new Tile[rowCount * columnCount];
         int i = 0;
 
@@ -80,7 +81,7 @@ public class LevelGenerator : MonoBehaviour
             }
         }
 
-        DetermineSpecialTiles();
+        //DetermineSpecialTiles();
     }
 
     void ClearTiles()
@@ -90,12 +91,6 @@ public class LevelGenerator : MonoBehaviour
             if(tileArray[i].RectT != null)
                 DestroyImmediate(tileArray[i].RectT.gameObject);
         }
-    }
-
-
-    private void OnValidate()
-    {
-
     }
 
 
@@ -112,9 +107,9 @@ public class LevelGenerator : MonoBehaviour
         float horizontalPosition = x * tileSize;
         float verticalPosition = y * tileSize;
         float horizontal = (y % 2 == 0) ? horizontalPosition : (tileSize * (rowCount -1)) - horizontalPosition;
-        Debug.Log(horizontal);
         newRect.localScale = Vector3.one;
-        newRect.anchoredPosition = new Vector3(horizontal, verticalPosition, 0);
+
+        newRect.anchoredPosition = new Vector3(horizontal - screenSize.x / 4, verticalPosition - screenSize.y / 2, 0);
         newRect.localPosition = new Vector3(newRect.localPosition.x, newRect.localPosition.y, 0);
 
         tileArray[index] = new Tile();
@@ -144,16 +139,9 @@ public class LevelGenerator : MonoBehaviour
         tileArray[index].TextMesh = textObject;
     }
 
-    void DetermineSpecialTiles()
+    public void DetermineSpecialTiles()
     {
         int occurance = tileArray.Length / 5;
-        //int minLeap = tileArray.Length / 15;
-        //int maxLeap = tileArray.Length - (tileArray.Length / 20);
-        //int currentLadders = 0;
-        //int currentSnakes = 0;
-
-        //int incline = tileArray.Length;
-        //int decline = tileArray.Length;
         int randomConnectedTile = 0;
 
         for(int currentLadders = 0; currentLadders < occurance / 2; currentLadders ++)
@@ -171,31 +159,6 @@ public class LevelGenerator : MonoBehaviour
             if (randomConnectedTile != 0)
                 CreateLineRenderers(tileArray[getTile], tileArray[randomConnectedTile], 1);
         }
-        /*
-        if (currentLadders < occurance / 2)
-
-        for(int i = 0; i < occurance; i++)
-        {
-            int getTile = FindFreeTile();
-            //int tileY = (int)tileArray[getTile].LocalCoordinates.y;
-            int orientation = Random.Range(0, 2);
-            if (orientation == 0)
-            {
-                randomConnectedTile = FindHigherTile(getTile);
-                    currentLadders += 1;
-
-            }
-            else if (orientation == 1)
-            {
-                randomConnectedTile = FindLowerTile(getTile);
-                currentSnakes += 1;
-            }
-            //randomConnectedTile = Mathf.Clamp(randomConnectedTile, 0, tileArray.Length - 1);
-            if (randomConnectedTile != 0)
-                CreateLineRenderers(tileArray[getTile], tileArray[randomConnectedTile], orientation);
-
-        }
-                */
     }
 
     int FindFreeTile()
@@ -253,7 +216,7 @@ public class LevelGenerator : MonoBehaviour
     {
         LineRenderer rend = new GameObject(origin.RectT.gameObject.ToString()).AddComponent<LineRenderer>();
 
-        //rend.transform.localScale = new Vector3(.5f, .5f, .5f);
+        rend.transform.localScale = new Vector3(0.6f, 0.6f, 0.6f);
 
         //rend.material = (orientation == 0) ? ladderMat : snakeMat;
         rend.transform.SetParent(origin.RectT);
@@ -272,8 +235,8 @@ public class LevelGenerator : MonoBehaviour
         {
             rend.material = ladderMat;
             rend.positionCount = 2;
-            rend.startWidth = 0.5f;
-            rend.endWidth = 0.3f;
+            rend.startWidth = 0.4f;
+            rend.endWidth = 0.2f;
             rend.SetPosition(0, origin.RectT.transform.position + zOffset);
             rend.SetPosition(1, target.RectT.transform.position + zOffset);
         }
@@ -281,7 +244,7 @@ public class LevelGenerator : MonoBehaviour
         {
             rend.material = snakeMat;
             rend.positionCount = 2;
-            rend.startWidth = 0.5f;
+            rend.startWidth = 0.4f;
             rend.endWidth = 0.2f;
             rend.SetPosition(0, origin.RectT.transform.position + zOffset);
             //Vector3 tempPos = new Vector3(origin.RectT.transform.position.x, target.RectT.transform.position.y, origin.RectT.transform.position.z);

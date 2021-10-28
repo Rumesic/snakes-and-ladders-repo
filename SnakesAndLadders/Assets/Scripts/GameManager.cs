@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using UnityEngine.SceneManagement;
 
 
 public class GameManager : MonoBehaviour
@@ -20,22 +21,23 @@ public class GameManager : MonoBehaviour
     [SerializeField] List<Player> players = new List<Player>();
     [SerializeField] List<Color> playerColors = new List<Color>();
     [SerializeField] int currentPlayer;
+    [SerializeField] GameObject Dice;
 
     [Header("UI")]
+    public CanvasScaler mainCanvas;
+    [SerializeField] RectTransform endPanel;
     [SerializeField] RectTransform scrollPaper;
     [SerializeField] Slider playerSlider;
+    [SerializeField] TextMeshProUGUI sliderValue;
     //[SerializeField] Slider columnSlider;
     //[SerializeField] Slider rowSlider;
     [SerializeField] Sprite playerSprite;
-    public static LevelGenerator levelGenerator;
-    public static Vector2 levelRectTransform;
+    public LevelGenerator levelGenerator;
+    public Vector2 levelRectTransform;
     [SerializeField] GameObject rollButton;
     [SerializeField] RectTransform forwardButton;
     [SerializeField] RectTransform backwardButton;
-    //[SerializeField] TextMeshProUGUI forwardText;
-    //[SerializeField] TextMeshProUGUI backwardText;
 
-    bool canGoBack;
     public bool canRoll;
     public bool waitingForRoll;
 
@@ -79,6 +81,11 @@ public class GameManager : MonoBehaviour
         //levelGenerator.rowCount = (int)rowSlider.value;
     }
 
+    public void SetSliderValue()
+    {
+        sliderValue.text = playerSlider.value.ToString();
+    }
+
     public void ScrollDown()
     {
         Vector2 scrollPos = scrollPaper.anchoredPosition;
@@ -99,95 +106,111 @@ public class GameManager : MonoBehaviour
             playerImage.color = playerColors[i];
             newT.localPosition = Vector3.zero;
             newT.localScale = Vector3.one;
-            players.Add(newT.gameObject.AddComponent<Player>());
+            Player newPlayer = newT.gameObject.AddComponent<Player>();
+            newPlayer.PlayerIndex = i;
+            newPlayer.Position = -1;
+            players.Add(newPlayer);
 
             canRoll = true;
         }
     }
-    /*
-    public void RollDice()
-    {
-        rollButton.SetActive(false);
-        randomDice = RandomDice();
-        canGoBack = (players[currentPlayer].position - randomDice >= 0) ? true : false;
-        forwardText.transform.parent.gameObject.SetActive(true);
-
-        if (canGoBack)
-        {
-            backwardText.text = (players[currentPlayer].position - randomDice + 1).ToString();
-            backwardText.transform.parent.gameObject.SetActive(true);
-        }
-        else
-            backwardText.transform.parent.gameObject.SetActive(false);
-
-        forwardText.text = (players[currentPlayer].position + randomDice + 1).ToString();
-        //players[currentPlayer].SetPosition(RandomDice());
-        //SetCurrentPlayer();
-    }*/
 
     public void RollDice(int roll)
     {
         randomDice = roll;
-        Debug.Log(roll);
         waitingForRoll = false;
-        canGoBack = (players[currentPlayer].position - randomDice >= 0) ? true : false;
-        if(canGoBack)
+        //Debug.Log(players[currentPlayer].Position);
+        int negativeValue = players[currentPlayer].Position - randomDice;
+        int positiveValue = players[currentPlayer].Position + randomDice;
+        positiveValue = Mathf.Clamp(positiveValue, 0, levelGenerator.tileArray.Length - 1);
+        
+        if(negativeValue >= 0)
         {
             backwardButton.gameObject.SetActive(true);
-            UpdateButtonPosition(backwardButton, players[currentPlayer].position - randomDice);
+            UpdateButtonPosition(backwardButton, negativeValue);
         }
+
         forwardButton.gameObject.SetActive(true);
-        UpdateButtonPosition(forwardButton, players[currentPlayer].position + randomDice);
+        UpdateButtonPosition(forwardButton, positiveValue);
         canRoll = false;
     }
     void UpdateButtonPosition(RectTransform button, int position)
     {
-        Vector3 tilePos = new Vector2(GameManager.levelGenerator.tileArray[position].RectT.anchoredPosition.x, GameManager.levelGenerator.tileArray[position].RectT.anchoredPosition.y);
-        Vector3 levelAnchorPos = GameManager.levelRectTransform;
+        position = Mathf.Clamp(position, 0, levelGenerator.tileArray.Length - 1);
+        Vector3 tilePos = new Vector2(levelGenerator.tileArray[position].RectT.anchoredPosition.x, levelGenerator.tileArray[position].RectT.anchoredPosition.y);
+        Vector3 levelAnchorPos = levelRectTransform;
+
 
         button.anchoredPosition = tilePos + levelAnchorPos;
-        //rectT.DOAnchorPos(tilePos + levelAnchorPos, 1);
     }
     
     public void GoForward()
     {
-        players[currentPlayer].SetPosition(players[currentPlayer].position + randomDice);
-        SetCurrentPlayer();
-        backwardButton.gameObject.SetActive(false);
-        forwardButton.gameObject.SetActive(false);
-        canRoll = true;
-        //rollButton.SetActive(true);
-        //forwardText.transform.parent.gameObject.SetActive(false);
-        //backwardText.transform.parent.gameObject.SetActive(false);
+        int value = players[currentPlayer].Position + randomDice;
+        value = Mathf.Clamp(value, 0, levelGenerator.tileArray.Length - 1);
+        players[currentPlayer].SetPosition(value);
+        ResetButtons();
     }
     public void GoBackwards()
     {
-        players[currentPlayer].SetPosition(players[currentPlayer].position - randomDice);
-        SetCurrentPlayer();
-        backwardButton.gameObject.SetActive(false);
-        forwardButton.gameObject.SetActive(false);
-        canRoll = true;
-        //rollButton.SetActive(true);
-        //backwardText.transform.parent.gameObject.SetActive(false);
-        //forwardText.transform.parent.gameObject.SetActive(false);
+        int value = players[currentPlayer].Position - randomDice;
+        value = Mathf.Clamp(value, 0, levelGenerator.tileArray.Length - 1);
+        players[currentPlayer].SetPosition(value);
+        ResetButtons();
+    }
+
+    void ResetButtons()
+    {
+        if(players.Count > 0)
+        {
+            SetCurrentPlayer();
+            backwardButton.gameObject.SetActive(false);
+            forwardButton.gameObject.SetActive(false);
+            canRoll = true;
+        }
+
     }
     
     void SetCurrentPlayer()
     {
-        for(int i = 0; i < players.Count; i++)
+        RemovePlayers();
+        if (players.Count == 0)
         {
-            if(players[i].gameFinished)
+            OnGameEnd();
+            return;
+        }
+        else if (players.Count == 1)
+            return;
+
+        else currentPlayer = (currentPlayer <= players.Count - 2) ? currentPlayer += 1 : currentPlayer = 0;
+    }
+
+    void RemovePlayers()
+    {
+        for (int i = 0; i < players.Count; i++)
+        {
+            if (players[i].GameFinished)
             {
                 players.RemoveAt(i);
                 players.TrimExcess();
-            }    
+            }
         }
-        currentPlayer = (currentPlayer < players.Count - 1) ? currentPlayer += 1 : currentPlayer = 0;
-        
     }
 
-    int RandomDice()
+    void OnGameEnd()
     {
-        return Random.Range(1, 6);
+        canRoll = false;
+        Dice.SetActive(false);
+        endPanel.gameObject.SetActive(true);
+    }
+
+    public void ReloadScene()
+    {
+        SceneManager.LoadScene(0);
+    }
+
+    public void ExitApplication()
+    {
+        Application.Quit();
     }
 }

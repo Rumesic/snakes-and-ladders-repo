@@ -5,15 +5,53 @@ using DG.Tweening;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] string playerName;
+    [SerializeField] int playerIndex;
 
-    [Range(0,99)]
-    [SerializeField] public int position;
+    [Range(-1, 99)]
+    [SerializeField] int position;
+    
+    
+    [SerializeField] private bool gameFinished;
 
-    public bool gameFinished;
+
 
 
     RectTransform rectT;
+
+    public bool GameFinished
+    {
+        get
+        {
+            return gameFinished;
+        }
+        set
+        {
+            gameFinished = value;
+        }
+    }
+
+    public int PlayerIndex
+    {
+        get
+        {
+            return playerIndex;
+        }
+        set
+        {
+            playerIndex = value;
+        }
+    }
+    public int Position
+    {
+        get
+        {
+            return position;
+        }
+        set
+        {
+            position = value;
+        }
+    }
 
     private void Start()
     {
@@ -22,38 +60,46 @@ public class Player : MonoBehaviour
     private void Update()
     {
         UpdatePosition();
-
-        if (gameFinished)
-            PlayerFinished();
     }
 
     void UpdatePosition()
     {
-        Vector3 tilePos = new Vector2(GameManager.levelGenerator.tileArray[position].RectT.anchoredPosition.x, GameManager.levelGenerator.tileArray[position].RectT.anchoredPosition.y);
-        Vector3 levelAnchorPos = GameManager.levelRectTransform;
-        rectT.DOAnchorPos(tilePos + levelAnchorPos, 1);
+        Vector3 levelAnchorPos = GameManager.Instance.levelRectTransform;
+        if (Position >= GameManager.Instance.levelGenerator.tileArray.Length - 1)
+            Position = -1;
+
+        else if (Position >= 0)
+        {
+            Vector3 tilePos = new Vector2(GameManager.Instance.levelGenerator.tileArray[position].RectT.anchoredPosition.x, GameManager.Instance.levelGenerator.tileArray[position].RectT.anchoredPosition.y);
+            rectT.DOAnchorPos(tilePos + levelAnchorPos, 1);
+        }
+
+        else if (Position == -1)
+        {
+            float tileSize = GameManager.Instance.levelGenerator.tileSize;
+            float verticalPos = tileSize * playerIndex;
+            Vector3 tilePos = new Vector2(GameManager.Instance.levelGenerator.tileArray[0].RectT.anchoredPosition.x - tileSize, GameManager.Instance.levelGenerator.tileArray[0].RectT.anchoredPosition.y + verticalPos);
+            rectT.DOAnchorPos(tilePos + levelAnchorPos, 1);
+        }
+
     }
 
     public void SetPosition(int index)
     {
-        position = (index < GameManager.levelGenerator.tileArray.Length - 1) ? index : GameManager.levelGenerator.tileArray.Length -1;
-        GameManager.levelGenerator.ActivateTile(position);
-        Tile currentTile = GameManager.levelGenerator.tileArray[position];
+        position = (index < GameManager.Instance.levelGenerator.tileArray.Length - 1) ? index : -1;
+
+        if (position == -1)
+        {
+            GameFinished = true;
+            return;
+        }
+        GameManager.Instance.levelGenerator.ActivateTile(position);
+        Tile currentTile = GameManager.Instance.levelGenerator.tileArray[position];
+
         if (currentTile.SpecialTile && currentTile.ConnectedIndex != 0)
         {
-            Debug.Log(currentTile.ConnectedIndex);
             position = currentTile.ConnectedIndex;
-            //SetPosition(currentTile.ConnectedIndex);
         }
-        if (position == GameManager.levelGenerator.tileArray.Length - 1)
-            PlayerFinished();
 
-    }
-
-
-    void PlayerFinished()
-    {
-        gameFinished = true;
-        rectT.DOScale(0, 1);
     }
 }
