@@ -85,6 +85,7 @@ public class DicePhysics : MonoBehaviour
         worldPos = Camera.main.ScreenToWorldPoint(screenPos);
         ResetVelocity();
         dragActive = true;
+        SoundManager.Instance.PlaySound(0);
         GameManager.Instance.waitingForRoll = true;
     }
 
@@ -173,7 +174,11 @@ public class DicePhysics : MonoBehaviour
         if(!dragActive && GameManager.Instance.waitingForRoll)
         {
             if (velMag < 0.1f)
+            {
+                SoundManager.Instance.PlaySound(3);
                 GameManager.Instance.RollDice(diceResult);
+            }
+
         }
     }
 
@@ -197,6 +202,11 @@ public class DicePhysics : MonoBehaviour
                 Gizmos.DrawSphere(boundsWorld[i], 0.2f);
             }
         }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        SoundManager.Instance.PlaySound(2);
     }
 
 }
